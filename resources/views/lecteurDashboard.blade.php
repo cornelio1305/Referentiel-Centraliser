@@ -27,11 +27,11 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h5 class="card-title">Scripts Consultés</h5>
-                                    <h3 class="mb-0">45</h3>
+                                    <h5 class="card-title">Sessions</h5>
+                                    <h3 class="mb-0">{{ session()->getId() ? '1' : '0' }}</h3>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-search fa-2x"></i>
+                                    <i class="fas fa-clock fa-2x"></i>
                                 </div>
                             </div>
                         </div>
@@ -42,11 +42,11 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h5 class="card-title">Favoris</h5>
-                                    <h3 class="mb-0">12</h3>
+                                    <h5 class="card-title">Profil</h5>
+                                    <h3 class="mb-0">{{ auth()->user()->name ? '✓' : '✗' }}</h3>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-heart fa-2x"></i>
+                                    <i class="fas fa-user fa-2x"></i>
                                 </div>
                             </div>
                         </div>
@@ -93,24 +93,14 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-3 mb-2">
-                                    <a href="{{ route('lecteur.scripts') }}" class="btn btn-primary w-100">
-                                        <i class="fas fa-search me-2"></i>Rechercher Scripts
-                                    </a>
-                                </div>
-                                <div class="col-md-3 mb-2">
-                                    <a href="{{ route('lecteur.favorites') }}" class="btn btn-danger w-100">
-                                        <i class="fas fa-heart me-2"></i>Mes Favoris
-                                    </a>
-                                </div>
-                                <div class="col-md-3 mb-2">
-                                    <a href="{{ route('lecteur.history') }}" class="btn btn-info w-100">
-                                        <i class="fas fa-history me-2"></i>Historique
-                                    </a>
-                                </div>
-                                <div class="col-md-3 mb-2">
-                                    <a href="{{ route('lecteur.profile') }}" class="btn btn-outline-primary w-100">
+                                <div class="col-md-6 mb-2">
+                                    <a href="{{ route('lecteur.profile') }}" class="btn btn-primary w-100">
                                         <i class="fas fa-user me-2"></i>Mon Profil
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-2">
+                                    <a href="{{ route('password.change.form') }}" class="btn btn-outline-secondary w-100">
+                                        <i class="fas fa-key me-2"></i>Changer mot de passe
                                     </a>
                                 </div>
                             </div>

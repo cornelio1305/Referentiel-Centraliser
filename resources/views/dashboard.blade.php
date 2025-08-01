@@ -27,11 +27,11 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h5 class="card-title">Total Scripts</h5>
-                                    <h3 class="mb-0">{{ \App\Models\Script::count() }}</h3>
+                                    <h5 class="card-title">Total Utilisateurs</h5>
+                                    <h3 class="mb-0">{{ \App\Models\User::count() }}</h3>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-code fa-2x"></i>
+                                    <i class="fas fa-users fa-2x"></i>
                                 </div>
                             </div>
                         </div>
@@ -42,11 +42,11 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h5 class="card-title">Scripts Actifs</h5>
-                                    <h3 class="mb-0">{{ \App\Models\Script::where('status', 'active')->count() }}</h3>
+                                    <h5 class="card-title">Utilisateurs Actifs</h5>
+                                    <h3 class="mb-0">{{ \App\Models\User::whereNotNull('email_verified_at')->count() }}</h3>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-play-circle fa-2x"></i>
+                                    <i class="fas fa-user-check fa-2x"></i>
                                 </div>
                             </div>
                         </div>

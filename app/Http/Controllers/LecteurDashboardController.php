@@ -15,21 +15,6 @@ class LecteurDashboardController extends Controller
                 'route' => 'lecteur.dashboard',
             ],
             [
-                'label' => 'Consulter les Scripts',
-                'icon' => 'fas fa-search',
-                'route' => 'lecteur.scripts',
-            ],
-            [
-                'label' => 'Mes Favoris',
-                'icon' => 'fas fa-heart',
-                'route' => 'lecteur.favorites',
-            ],
-            [
-                'label' => 'Historique de Lecture',
-                'icon' => 'fas fa-history',
-                'route' => 'lecteur.history',
-            ],
-            [
                 'label' => 'Mon Profil',
                 'icon' => 'fas fa-user',
                 'route' => 'lecteur.profile',

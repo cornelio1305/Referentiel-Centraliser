@@ -4,12 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EditeurDashboardController;
-use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\LecteurDashboardController;
-use App\Http\Controllers\LecteurScriptController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\ScriptController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,9 +28,6 @@ Route::middleware('auth')->group(function () {
     // Lecteur Dashboard and routes
     Route::prefix('lecteur')->name('lecteur.')->group(function () {
         Route::get('/dashboard', [LecteurDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/scripts', [LecteurScriptController::class, 'index'])->name('scripts');
-        Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites');
-        Route::get('/history', [LecteurScriptController::class, 'history'])->name('history');
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     });
     
@@ -58,19 +52,6 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
 
-    // Scripts management routes
-    Route::prefix('scripts')->name('scripts.')->group(function () {
-        Route::get('/', [ScriptController::class, 'index'])->name('index');
-        Route::get('/create', [ScriptController::class, 'create'])->name('create');
-        Route::get('/active', [ScriptController::class, 'active'])->name('active');
-        Route::get('/history', [ScriptController::class, 'history'])->name('history');
-        Route::post('/', [ScriptController::class, 'store'])->name('store');
-        Route::get('/{id}', [ScriptController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [ScriptController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [ScriptController::class, 'update'])->name('update');
-        Route::delete('/{id}', [ScriptController::class, 'destroy'])->name('destroy');
-    });
-
     // Profile routes
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [ProfileController::class, 'show'])->name('show');
@@ -84,13 +65,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/verify', [ChangePasswordController::class, 'verifyCredentials'])->name('verify');
         Route::post('/', [ChangePasswordController::class, 'updatePassword'])->name('submit');
     });
-
-         // Favorites routes
-     Route::prefix('favorites')->name('favorites.')->group(function () {
-         Route::get('/', [FavoriteController::class, 'index'])->name('index');
-         Route::post('/toggle/{script}', [FavoriteController::class, 'toggle'])->name('toggle');
-         Route::delete('/{favorite}', [FavoriteController::class, 'destroy'])->name('destroy');
-     });
 
      // Reports
      Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');

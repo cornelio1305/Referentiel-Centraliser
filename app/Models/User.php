@@ -42,20 +42,7 @@ class User extends Authenticatable
     }
 
     // Relations
-    public function scripts()
-    {
-        return $this->hasMany(Script::class, 'created_by');
-    }
-
-    public function favorites()
-    {
-        return $this->hasMany(Favorite::class);
-    }
-
-    public function scriptViews()
-    {
-        return $this->hasMany(ScriptView::class);
-    }
+    // Aucune relation pour le moment
 
     // Méthodes pour vérifier les rôles
     public function isAdmin()
