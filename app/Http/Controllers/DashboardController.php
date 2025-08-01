@@ -15,33 +15,6 @@ class DashboardController extends Controller
                 'icon' => 'fas fa-tachometer-alt',
                 'route' => 'dashboard',
             ],
-               [
-                'label' => 'Gestion des Scripts',
-                'icon' => 'fas fa-code',
-                'route' => 'dashboard',
-                'children' => [
-                    [
-                        'label' => 'Tous les Scripts',
-                        'route' => 'scripts.index',
-                        'icon' => 'fas fa-list-ul'
-                    ],
-                    [
-                        'label' => 'Nouveau Script',
-                        'route' => 'scripts.create',
-                        'icon' => 'fas fa-plus-circle'
-                    ],
-                    [
-                        'label' => 'Scripts Actifs',
-                        'route' => 'scripts.active',
-                        'icon' => 'fas fa-play-circle'
-                    ],
-                    [
-                        'label' => 'Historique',
-                        'route' => 'scripts.history',
-                        'icon' => 'fas fa-history'
-                    ],
-                ],
-            ],
             [
                 'label' => 'Utilisateurs',
                 'icon' => 'fas fa-users',
