@@ -1,0 +1,254 @@
+@startuml Diagramme_Classes_Referentiel_SQL
+
+title Diagramme de Classes - Référentiel Centralisé Multi-SGBD\nGestion des Scripts SQL
+
+' Classes principales
+
+class ScriptSQL {
+    - id: Long
+    - nom: String
+    - contenu: String
+    - auteur: String
+    - dateCreation: Date
+    - derniereModification: Date
+    - version: String
+    - description: String
+    - taille: Long
+    --
+    + creer()
+    + modifier()
+    + supprimer()
+    + obtenirContenu()
+    + obtenirMetadonnees()
+}
+
+class SGBD {
+    - id: Long
+    - nom: String
+    - type: TypeSGBD
+    - version: String
+    - syntaxe: String
+    --
+    + validerSyntaxe()
+    + executerScript()
+    + obtenirMetadonnees()
+}
+
+class Serveur {
+    - id: Long
+    - nom: String
+    - adresseIP: String
+    - port: Integer
+    - environnement: String
+    - statut: String
+    --
+    + connecter()
+    + deconnecter()
+    + testerConnexion()
+    + obtenirStatut()
+}
+
+class BaseDeDonnees {
+    - id: Long
+    - nom: String
+    - schema: String
+    - taille: Long
+    - dateCreation: Date
+    --
+    + creer()
+    + supprimer()
+    + sauvegarder()
+}
+
+class Utilisateur {
+    - id: Long
+    - nom: String
+    - email: String
+    - role: Role
+    - dateCreation: Date
+    - derniereConnexion: Date
+    --
+    + seConnecter()
+    + seDeconnecter()
+    + changerMotDePasse()
+    + obtenirDroits()
+}
+
+class HistoriqueVersion {
+    - id: Long
+    - numeroVersion: String
+    - dateModification: Date
+    - auteur: String
+    - commentaire: String
+    - contenuPrecedent: String
+    --
+    + creerVersion()
+    + restaurerVersion()
+    + comparerVersions()
+    + obtenirHistorique()
+}
+
+class Metadonnees {
+    - id: Long
+    - cle: String
+    - valeur: String
+    - type: String
+    - dateCreation: Date
+    - obligatoire: Boolean
+    --
+    + ajouter()
+    + modifier()
+    + supprimer()
+    + rechercher()
+}
+
+class Dependance {
+    - id: Long
+    - type: TypeDependance
+    - description: String
+    - ordre: Integer
+    --
+    + creer()
+    + supprimer()
+    + verifier()
+}
+
+class ObjetSQL {
+    - id: Long
+    - nom: String
+    - type: TypeObjet
+    - schema: String
+    --
+    + creer()
+    + modifier()
+    + supprimer()
+}
+
+class ApplicationJob {
+    - id: Long
+    - nom: String
+    - type: String
+    - description: String
+    - planification: String
+    --
+    + executer()
+    + planifier()
+    + arreter()
+}
+
+class ProfilUtilisateur {
+    - id: Long
+    - nom: String
+    - permissions: List<String>
+    - restrictions: List<String>
+    - environnements: List<String>
+    --
+    + attribuerDroits()
+    + retirerDroits()
+    + verifierAcces()
+}
+
+class Referentiel {
+    - id: Long
+    - nom: String
+    - version: String
+    - dateCreation: Date
+    - administrateur: String
+    - configuration: String
+    --
+    + initialiser()
+    + sauvegarder()
+    + restaurer()
+    + synchroniser()
+    + genererRapport()
+}
+
+' Énumérations
+
+enum TypeSGBD {
+    POSTGRESQL
+    MYSQL
+    SQL_SERVER
+    DB2
+    ORACLE
+}
+
+enum TypeObjet {
+    TABLE
+    VUE
+    PROCEDURE
+    FONCTION
+    TRIGGER
+    INDEX
+}
+
+enum TypeDependance {
+    SCRIPT_PREREQUIS
+    OBJET_REQUIS
+    DONNEES_NECESSAIRES
+}
+
+enum Role {
+    ADMINISTRATEUR
+    EDITEUR
+    LECTEUR
+    AUDITEUR
+}
+
+' Relations
+
+ScriptSQL ||--o{ SGBD : "compatible avec"
+ScriptSQL }o--|| Serveur : "exécuté sur"
+Serveur ||--o{ BaseDeDonnees : "héberge"
+Utilisateur ||--o{ ScriptSQL : "crée/modifie"
+ScriptSQL ||--o{ HistoriqueVersion : "versionné par"
+ScriptSQL ||--o{ Metadonnees : "décrit par"
+ScriptSQL }o--o{ Dependance : "dépend de"
+ScriptSQL ||--o{ ObjetSQL : "manipule"
+ApplicationJob }o--o{ ScriptSQL : "utilise"
+Utilisateur ||--|| ProfilUtilisateur : "possède"
+Referentiel ||--o{ ScriptSQL : "gère"
+Referentiel ||--o{ Utilisateur : "contient"
+Referentiel ||--o{ SGBD : "supporte"
+Referentiel ||--o{ Serveur : "administre"
+
+' Packages/Modules
+
+package "Gestion des Scripts" {
+    ScriptSQL
+    HistoriqueVersion
+    Metadonnees
+    Dependance
+}
+
+package "Infrastructure" {
+    SGBD
+    Serveur
+    BaseDeDonnees
+}
+
+package "Sécurité et Utilisateurs" {
+    Utilisateur
+    ProfilUtilisateur
+}
+
+package "Objets et Applications" {
+    ObjetSQL
+    ApplicationJob
+}
+
+package "Système Central" {
+    Referentiel
+}
+
+' Notes explicatives
+
+note right of ScriptSQL : Classe centrale du système\ncontenant tous les scripts SQL\navec leurs métadonnées
+
+note bottom of HistoriqueVersion : Assure la traçabilité\ndes modifications et permet\nla restauration de versions
+
+note left of ProfilUtilisateur : Gestion fine des droits\nd'accès selon les environnements\net les types d'opérations
+
+note top of Referentiel : Point central de gestion\ndu système, coordonne\ntoutes les opérations
+
+@enduml
