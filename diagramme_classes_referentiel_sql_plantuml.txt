@@ -1,0 +1,323 @@
+@startuml Diagramme_Classes_Referentiel_SQL
+
+title Diagramme de Classes - Référentiel Centralisé Multi-SGBD\nGestion des Scripts SQL
+
+' Classes principales
+
+class ScriptSQL {
+    - id: Long
+    - nom: String
+    - contenu: String
+    - auteur: String
+    - dateCreation: Date
+    - derniereModification: Date
+    - version: String
+    - description: String
+    - taille: Long
+    --
+    + creer()
+    + modifier()
+    + supprimer()
+    + obtenirContenu()
+    + obtenirMetadonnees()
+}
+
+class SGBD {
+    - id: Long
+    - nom: String
+    - type: TypeSGBD
+    - version: String
+    - syntaxe: String
+    --
+    + validerSyntaxe()
+    + executerScript()
+    + obtenirMetadonnees()
+}
+
+class Serveur {
+    - id: Long
+    - nom: String
+    - adresseIP: String
+    - port: Integer
+    - environnement: String
+    - statut: String
+    --
+    + connecter()
+    + deconnecter()
+    + testerConnexion()
+    + obtenirStatut()
+}
+
+class BaseDeDonnees {
+    - id: Long
+    - nom: String
+    - schema: String
+    - taille: Long
+    - dateCreation: Date
+    --
+    + creer()
+    + supprimer()
+    + sauvegarder()
+}
+
+class Utilisateur {
+    - id: Long
+    - nom: String
+    - email: String
+    - role: Role
+    - dateCreation: Date
+    - derniereConnexion: Date
+    --
+    + seConnecter()
+    + seDeconnecter()
+    + changerMotDePasse()
+    + obtenirDroits()
+}
+
+class HistoriqueVersion {
+    - id: Long
+    - numeroVersion: String
+    - dateModification: Date
+    - auteur: String
+    - commentaire: String
+    - contenuPrecedent: String
+    --
+    + creerVersion()
+    + restaurerVersion()
+    + comparerVersions()
+    + obtenirHistorique()
+}
+
+class Metadonnees {
+    - id: Long
+    - cle: String
+    - valeur: String
+    - type: String
+    - dateCreation: Date
+    - obligatoire: Boolean
+    --
+    + ajouter()
+    + modifier()
+    + supprimer()
+    + rechercher()
+}
+
+class Dependance {
+    - id: Long
+    - scriptSource: Long
+    - scriptCible: Long
+    - type: TypeDependance
+    - description: String
+    - ordre: Integer
+    --
+    + creer()
+    + supprimer()
+    + verifier()
+}
+
+class ObjetSQL {
+    - id: Long
+    - nom: String
+    - type: TypeObjet
+    - schema: String
+    --
+    + creer()
+    + modifier()
+    + supprimer()
+}
+
+class ApplicationJob {
+    - id: Long
+    - nom: String
+    - type: String
+    - description: String
+    - planification: String
+    --
+    + executer()
+    + planifier()
+    + arreter()
+}
+
+class ProfilUtilisateur {
+    - id: Long
+    - nom: String
+    - permissions: List<String>
+    - restrictions: List<String>
+    - environnements: List<String>
+    --
+    + attribuerDroits()
+    + retirerDroits()
+    + verifierAcces()
+}
+
+class Referentiel {
+    - id: Long
+    - nom: String
+    - version: String
+    - dateCreation: Date
+    - administrateur: String
+    - configuration: String
+    --
+    + initialiser()
+    + sauvegarder()
+    + restaurer()
+    + synchroniser()
+    + genererRapport()
+}
+
+' Énumérations
+
+enum TypeSGBD {
+    POSTGRESQL
+    MYSQL
+    SQL_SERVER
+    DB2
+    ORACLE
+}
+
+enum TypeObjet {
+    TABLE
+    VUE
+    PROCEDURE
+    FONCTION
+    TRIGGER
+    INDEX
+}
+
+enum TypeDependance {
+    SCRIPT_PREREQUIS
+    OBJET_REQUIS
+    DONNEES_NECESSAIRES
+}
+
+enum Role {
+    ADMINISTRATEUR
+    EDITEUR
+    LECTEUR
+    AUDITEUR
+}
+
+' Relations avec cardinalités précises
+
+' 1. ScriptSQL ↔ SGBD (Many-to-Many via table d'association)
+ScriptSQL "1..*" --o "1..*" SGBD : "compatible avec"
+
+' 2. ScriptSQL ↔ Serveur (Many-to-One)
+ScriptSQL "0..*" --> "1" Serveur : "exécuté sur"
+
+' 3. Serveur ↔ BaseDeDonnees (One-to-Many, Composition)
+Serveur "1" *-- "1..*" BaseDeDonnees : "héberge"
+
+' 4. Utilisateur ↔ ScriptSQL (One-to-Many)
+Utilisateur "1" --> "0..*" ScriptSQL : "crée/modifie"
+
+' 5. ScriptSQL ↔ HistoriqueVersion (One-to-Many, Composition)
+ScriptSQL "1" *-- "0..*" HistoriqueVersion : "versionné par"
+
+' 6. ScriptSQL ↔ Metadonnees (One-to-Many, Composition)
+ScriptSQL "1" *-- "1..*" Metadonnees : "décrit par"
+
+' 7. ScriptSQL ↔ Dependance (Many-to-Many via Dependance)
+ScriptSQL "1" --> "0..*" Dependance : "source de"
+ScriptSQL "1" --> "0..*" Dependance : "cible de"
+
+' 8. ScriptSQL ↔ ObjetSQL (Many-to-Many)
+ScriptSQL "0..*" --> "1..*" ObjetSQL : "manipule"
+
+' 9. ApplicationJob ↔ ScriptSQL (Many-to-Many, Aggregation)
+ApplicationJob "0..*" o-- "1..*" ScriptSQL : "utilise"
+
+' 10. Utilisateur ↔ ProfilUtilisateur (One-to-One)
+Utilisateur "1" -- "1" ProfilUtilisateur : "possède"
+
+' 11. Referentiel ↔ ScriptSQL (One-to-Many, Composition)
+Referentiel "1" *-- "0..*" ScriptSQL : "gère"
+
+' 12. Referentiel ↔ Utilisateur (One-to-Many, Composition)
+Referentiel "1" *-- "1..*" Utilisateur : "contient"
+
+' 13. Referentiel ↔ SGBD (One-to-Many, Aggregation)
+Referentiel "1" o-- "1..*" SGBD : "supporte"
+
+' 14. Referentiel ↔ Serveur (One-to-Many, Aggregation)
+Referentiel "1" o-- "0..*" Serveur : "administre"
+
+' 15. SGBD ↔ BaseDeDonnees (One-to-Many)
+SGBD "1" --> "0..*" BaseDeDonnees : "gère"
+
+' 16. BaseDeDonnees ↔ ObjetSQL (One-to-Many, Composition)
+BaseDeDonnees "1" *-- "0..*" ObjetSQL : "contient"
+
+' 17. ProfilUtilisateur ↔ Serveur (Many-to-Many)
+ProfilUtilisateur "1..*" --> "0..*" Serveur : "accède à"
+
+' Relations vers énumérations (One-to-One)
+SGBD "1" --> "1" TypeSGBD : "est de type"
+ObjetSQL "1" --> "1" TypeObjet : "est de type"
+Dependance "1" --> "1" TypeDependance : "est de type"
+Utilisateur "1" --> "1" Role : "a pour rôle"
+
+' Packages/Modules logiques
+
+package "Gestion des Scripts" #LightCyan {
+    ScriptSQL
+    HistoriqueVersion
+    Metadonnees
+    Dependance
+}
+
+package "Infrastructure" #LightGreen {
+    SGBD
+    Serveur
+    BaseDeDonnees
+}
+
+package "Sécurité et Utilisateurs" #LightCoral {
+    Utilisateur
+    ProfilUtilisateur
+}
+
+package "Objets et Applications" #LightYellow {
+    ObjetSQL
+    ApplicationJob
+}
+
+package "Système Central" #LightBlue {
+    Referentiel
+}
+
+package "Types et Énumérations" #LightGray {
+    TypeSGBD
+    TypeObjet
+    TypeDependance
+    Role
+}
+
+' Notes explicatives
+
+note right of ScriptSQL : **Classe centrale du système**\nContient tous les scripts SQL\navec leurs métadonnées complètes\n--\nCardinalités importantes :\n• 1..* vers Metadonnees (obligatoire)\n• 1..* vers ObjetSQL (manipule au moins un objet)
+
+note bottom of HistoriqueVersion : **Assure la traçabilité**\ndes modifications et permet\nla restauration de versions\n--\nComposition avec ScriptSQL :\nsuppression en cascade
+
+note left of ProfilUtilisateur : **Gestion fine des droits**\nd'accès selon les environnements\net les types d'opérations\n--\nMany-to-Many avec Serveur\npour accès multi-environnements
+
+note top of Referentiel : **Point central de gestion**\ndu système, coordonne\ntoutes les opérations\n--\nComposition avec :\n• ScriptSQL\n• Utilisateur\nAgrégation avec :\n• SGBD\n• Serveur
+
+note bottom of Dependance : **Gestion des dépendances**\nTable d'association pour\nrelations Many-to-Many\nentre ScriptSQL\n--\nTypes : Prérequis, Objets, Données
+
+' Légende des cardinalités
+note as CardinalityLegend
+**Légende des Cardinalités :**
+• 1 : Exactement un
+• 0..1 : Zéro ou un
+• 1..* : Un ou plusieurs
+• 0..* : Zéro ou plusieurs
+
+**Types de Relations :**
+• --> : Association simple
+• --o : Agrégation (◊)
+• *-- : Composition (♦)
+• -- : Association bidirectionnelle
+end note
+
+@enduml
