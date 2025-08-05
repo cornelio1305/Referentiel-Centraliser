@@ -3,10 +3,9 @@
 @section('title', 'Dashboard Admin')
 
 @section('content')
-@include('partials.admin.anavbar')
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
+        <!-- Sidebar Admin -->
         @include('partials.sidebar')
 
         <!-- Main content -->
@@ -23,30 +22,30 @@
             <!-- Statistiques rapides -->
             <div class="row mb-4">
                 <div class="col-md-3">
-                    <div class="card text-white bg-danger">
+                    <div class="card text-white bg-primary">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h5 class="card-title">Total Scripts</h5>
-                                    <h3 class="mb-0">{{ \App\Models\Script::count() }}</h3>
+                                    <h5 class="card-title">Total Utilisateurs</h5>
+                                    <h3 class="mb-0">{{ $stats['total_users'] }}</h3>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-code fa-2x"></i>
+                                    <i class="fas fa-users fa-2x"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card text-white bg-success">
+                    <div class="card text-white bg-danger">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h5 class="card-title">Scripts Actifs</h5>
-                                    <h3 class="mb-0">{{ \App\Models\Script::where('status', 'active')->count() }}</h3>
+                                    <h5 class="card-title">Administrateurs</h5>
+                                    <h3 class="mb-0">{{ $stats['admin_users'] }}</h3>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-play-circle fa-2x"></i>
+                                    <i class="fas fa-user-shield fa-2x"></i>
                                 </div>
                             </div>
                         </div>
@@ -57,26 +56,26 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h5 class="card-title">Total Utilisateurs</h5>
-                                    <h3 class="mb-0">{{ \App\Models\User::count() }}</h3>
+                                    <h5 class="card-title">Éditeurs</h5>
+                                    <h3 class="mb-0">{{ $stats['editeur_users'] }}</h3>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-users fa-2x"></i>
+                                    <i class="fas fa-user-edit fa-2x"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <div class="card text-white bg-info">
+                    <div class="card text-white bg-success">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <div>
-                                    <h5 class="card-title">Total Vues</h5>
-                                    <h3 class="mb-0">{{ \App\Models\ScriptView::count() }}</h3>
+                                    <h5 class="card-title">Lecteurs</h5>
+                                    <h3 class="mb-0">{{ $stats['lecteur_users'] }}</h3>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-eye fa-2x"></i>
+                                    <i class="fas fa-user fa-2x"></i>
                                 </div>
                             </div>
                         </div>
@@ -94,23 +93,23 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-3 mb-2">
+                                    <a href="{{ route('scripts.index') }}" class="btn btn-primary w-100">
+                                        <i class="fas fa-code me-2"></i>Gérer Scripts
+                                    </a>
+                                </div>
+                                <div class="col-md-3 mb-2">
                                     <a href="{{ route('utilisateurs.index') }}" class="btn btn-danger w-100">
                                         <i class="fas fa-users me-2"></i>Gérer Utilisateurs
                                     </a>
                                 </div>
                                 <div class="col-md-3 mb-2">
-                                    <a href="{{ route('scripts.index') }}" class="btn btn-secondary w-100">
-                                        <i class="fas fa-code me-2"></i>Gérer Scripts
-                                    </a>
-                                </div>
-                                <div class="col-md-3 mb-2">
                                     <a href="{{ route('reports.index') }}" class="btn btn-info w-100">
-                                        <i class="fas fa-chart-bar me-2"></i>Rapports
+                                        <i class="fas fa-chart-bar me-2"></i>Voir Rapports
                                     </a>
                                 </div>
                                 <div class="col-md-3 mb-2">
-                                    <a href="{{ route('users.create') }}" class="btn btn-outline-danger w-100">
-                                        <i class="fas fa-user-plus me-2"></i>Nouvel Utilisateur
+                                    <a href="{{ route('profile.show') }}" class="btn btn-warning w-100">
+                                        <i class="fas fa-user me-2"></i>Mon Profil
                                     </a>
                                 </div>
                             </div>
@@ -120,56 +119,81 @@
             </div>
 
             <!-- Scripts récents -->
-            <div class="row">
+            @if($recentScripts->count() > 0)
+            <div class="row mb-4">
                 <div class="col-12">
                     <div class="card">
-                        <div class="card-header">
+                        <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Scripts Récents</h5>
+                            <a href="{{ route('scripts.index') }}" class="btn btn-sm btn-outline-primary">Voir tous</a>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-striped">
+                                <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th>Nom du Script</th>
-                                            <th>Créateur</th>
+                                            <th>Nom</th>
+                                            <th>Version</th>
+                                            <th>Base de données</th>
+                                            <th>Auteur</th>
                                             <th>Statut</th>
-                                            <th>Catégorie</th>
-                                            <th>Vues</th>
-                                            <th>Actions</th>
+                                            <th>Créé le</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach(\App\Models\Script::with('creator')->latest()->limit(5)->get() as $script)
+                                        @foreach($recentScripts as $script)
                                         <tr>
-                                            <td>{{ $script->name }}</td>
-                                            <td>{{ $script->creator->name ?? 'N/A' }}</td>
                                             <td>
-                                                @switch($script->status)
-                                                    @case('active')
-                                                        <span class="badge bg-success">Actif</span>
-                                                        @break
-                                                    @case('draft')
-                                                        <span class="badge bg-secondary">Brouillon</span>
-                                                        @break
-                                                    @case('in_review')
-                                                        <span class="badge bg-warning">En Révision</span>
-                                                        @break
-                                                    @case('archived')
-                                                        <span class="badge bg-dark">Archivé</span>
-                                                        @break
-                                                @endswitch
+                                                <a href="{{ route('scripts.show', $script) }}" class="text-decoration-none">
+                                                    {{ $script->name }}
+                                                </a>
                                             </td>
-                                            <td>{{ $script->category ?? 'N/A' }}</td>
-                                            <td>{{ $script->views_count }}</td>
+                                            <td><span class="badge bg-info">{{ $script->version }}</span></td>
                                             <td>
-                                                <a href="{{ route('scripts.show', $script->id) }}" class="btn btn-sm btn-outline-primary">Voir</a>
-                                                <a href="{{ route('scripts.edit', $script->id) }}" class="btn btn-sm btn-outline-secondary">Modifier</a>
+                                                @if($script->db_target)
+                                                    <span class="badge bg-secondary">{{ $script->db_target_label }}</span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
                                             </td>
+                                            <td>{{ $script->author ?? $script->creator->name }}</td>
+                                            <td>
+                                                <span class="badge bg-{{ $script->status === 'active' ? 'success' : ($script->status === 'draft' ? 'warning' : 'secondary') }}">
+                                                    {{ $script->status_label }}
+                                                </span>
+                                            </td>
+                                            <td>{{ $script->created_at->format('d/m/Y H:i') }}</td>
                                         </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Informations système -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Informations Système</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Statut de l'application</h6>
+                                    <p class="text-success"><i class="fas fa-check-circle me-2"></i>Application opérationnelle</p>
+                                    <p><strong>Version Laravel:</strong> {{ app()->version() }}</p>
+                                    <p><strong>Environnement:</strong> {{ config('app.env') }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Dernière activité</h6>
+                                    <p><strong>Dernière connexion:</strong> {{ auth()->user()->updated_at->format('d/m/Y H:i') }}</p>
+                                    <p><strong>Rôle:</strong> {{ ucfirst(auth()->user()->role) }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>

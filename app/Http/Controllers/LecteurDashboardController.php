@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Script;
 
 class LecteurDashboardController extends Controller
 {
@@ -17,22 +18,17 @@ class LecteurDashboardController extends Controller
             [
                 'label' => 'Consulter les Scripts',
                 'icon' => 'fas fa-search',
-                'route' => 'lecteur.scripts',
+                'route' => 'scripts.index',
             ],
             [
-                'label' => 'Mes Favoris',
-                'icon' => 'fas fa-heart',
-                'route' => 'lecteur.favorites',
-            ],
-            [
-                'label' => 'Historique de Lecture',
-                'icon' => 'fas fa-history',
-                'route' => 'lecteur.history',
+                'label' => 'Recherche Avancée',
+                'icon' => 'fas fa-search-plus',
+                'route' => 'scripts.search',
             ],
             [
                 'label' => 'Mon Profil',
                 'icon' => 'fas fa-user',
-                'route' => 'lecteur.profile',
+                'route' => 'profile.show',
             ],
             [
                 'label' => 'Déconnexion',
@@ -41,6 +37,20 @@ class LecteurDashboardController extends Controller
             ],
         ];
 
-        return view('lecteurDashboard', compact('menuItems'));
+        // Statistiques pour le lecteur
+        $stats = [
+            'total_scripts' => Script::count(),
+            'active_scripts' => Script::where('status', 'active')->count(),
+            'recent_scripts' => Script::where('created_at', '>=', now()->subDays(7))->count(),
+        ];
+
+        // Scripts populaires (les plus consultés)
+        $popularScripts = Script::with('creator')
+            ->withCount('views')
+            ->orderBy('views_count', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('lecteurDashboard', compact('menuItems', 'stats', 'popularScripts'));
     }
 }

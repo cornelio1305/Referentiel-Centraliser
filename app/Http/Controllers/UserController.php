@@ -122,4 +122,13 @@ class UserController extends Controller
         $user->delete();
         return back()->with('success', 'Utilisateur supprimé.');
     }
+
+    /**
+     * Afficher le profil de l'utilisateur connecté
+     */
+    public function show()
+    {
+        $user = auth()->user();
+        return view('profile.show', compact('user'));
+    }
 }

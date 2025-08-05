@@ -2,160 +2,135 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Script;
 use App\Models\User;
 use App\Models\ScriptView;
-use App\Models\Favorite;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReportController extends Controller
 {
+    /**
+     * Afficher la page des rapports
+     */
     public function index()
     {
-        $user = Auth::user();
-        
-        if ($user->isAdmin()) {
-            return $this->adminReports();
-        } elseif ($user->isEditeur()) {
-            return $this->editeurReports();
-        } else {
-            return $this->lecteurReports();
-        }
+        return view('reports.index');
     }
 
-    private function adminReports()
+    /**
+     * Rapport des scripts par base de données
+     */
+    public function scriptsByDatabase()
     {
-        // Statistiques globales
-        $totalScripts = Script::count();
-        $activeScripts = Script::where('status', 'active')->count();
-        $totalUsers = User::count();
-        $totalViews = ScriptView::count();
-        
-        // Scripts par catégorie
-        $scriptsByCategory = Script::selectRaw('category, count(*) as count')
-            ->groupBy('category')
+        $stats = Script::select('db_target', DB::raw('count(*) as total'))
+            ->groupBy('db_target')
             ->get();
-        
-        // Scripts par statut
-        $scriptsByStatus = Script::selectRaw('status, count(*) as count')
+
+        return view('reports.scripts-by-database', compact('stats'));
+    }
+
+    /**
+     * Rapport d'utilisation des scripts
+     */
+    public function scriptUsage()
+    {
+        $usage = Script::withCount('views')
+            ->with('creator')
+            ->orderBy('views_count', 'desc')
+            ->limit(20)
+            ->get();
+
+        return view('reports.script-usage', compact('usage'));
+    }
+
+    /**
+     * Rapport d'activité des utilisateurs
+     */
+    public function userActivity()
+    {
+        $activity = User::withCount(['scripts', 'scriptViews'])
+            ->orderBy('scripts_count', 'desc')
+            ->get();
+
+        return view('reports.user-activity', compact('activity'));
+    }
+
+    /**
+     * Rapport des scripts par statut
+     */
+    public function scriptsByStatus()
+    {
+        $stats = Script::select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->get();
-        
-        // Utilisateurs par rôle
-        $usersByRole = User::selectRaw('role, count(*) as count')
-            ->groupBy('role')
-            ->get();
-        
-        // Scripts les plus populaires
-        $popularScripts = Script::with('creator')
-            ->orderBy('views_count', 'desc')
-            ->limit(10)
-            ->get();
-        
-        return view('reports.admin', compact(
-            'totalScripts',
-            'activeScripts',
-            'totalUsers',
-            'totalViews',
-            'scriptsByCategory',
-            'scriptsByStatus',
-            'usersByRole',
-            'popularScripts'
-        ));
+
+        return view('reports.scripts-by-status', compact('stats'));
     }
 
-    private function editeurReports()
-    {
-        $user = Auth::user();
-        
-        // Scripts de l'éditeur
-        $myScripts = Script::where('created_by', $user->id)->count();
-        $myActiveScripts = Script::where('created_by', $user->id)
-            ->where('status', 'active')
-            ->count();
-        
-        // Vues totales de mes scripts
-        $myTotalViews = Script::where('created_by', $user->id)->sum('views_count');
-        
-        // Scripts par statut
-        $myScriptsByStatus = Script::where('created_by', $user->id)
-            ->selectRaw('status, count(*) as count')
-            ->groupBy('status')
-            ->get();
-        
-        // Mes scripts les plus populaires
-        $myPopularScripts = Script::where('created_by', $user->id)
-            ->orderBy('views_count', 'desc')
-            ->limit(10)
-            ->get();
-        
-        // Activité récente
-        $recentActivity = Script::where('created_by', $user->id)
-            ->orderBy('updated_at', 'desc')
-            ->limit(5)
-            ->get();
-        
-        return view('reports.editeur', compact(
-            'myScripts',
-            'myActiveScripts',
-            'myTotalViews',
-            'myScriptsByStatus',
-            'myPopularScripts',
-            'recentActivity'
-        ));
-    }
-
-    private function lecteurReports()
-    {
-        $user = Auth::user();
-        
-        // Statistiques du lecteur
-        $scriptsViewed = $user->scriptViews()->count();
-        $favoritesCount = $user->favorites()->count();
-        $thisWeekViews = $user->scriptViews()
-            ->whereBetween('viewed_at', [now()->startOfWeek(), now()->endOfWeek()])
-            ->count();
-        
-        // Scripts récemment consultés
-        $recentViews = $user->scriptViews()
-            ->with('script.creator')
-            ->orderBy('viewed_at', 'desc')
-            ->limit(10)
-            ->get();
-        
-        // Favoris
-        $favorites = $user->favorites()
-            ->with('script.creator')
-            ->limit(10)
-            ->get();
-        
-        // Catégories préférées
-        $preferredCategories = $user->scriptViews()
-            ->join('scripts', 'script_views.script_id', '=', 'scripts.id')
-            ->selectRaw('scripts.category, count(*) as count')
-            ->groupBy('scripts.category')
-            ->orderBy('count', 'desc')
-            ->limit(5)
-            ->get();
-        
-        return view('reports.lecteur', compact(
-            'scriptsViewed',
-            'favoritesCount',
-            'thisWeekViews',
-            'recentViews',
-            'favorites',
-            'preferredCategories'
-        ));
-    }
-
+    /**
+     * Exporter un rapport
+     */
     public function export(Request $request)
     {
-        $type = $request->get('type', 'general');
-        $format = $request->get('format', 'pdf');
-        
-        // Logique d'export selon le type et le format
-        // Pour l'instant, retourner un message
-        return back()->with('success', "Export $type en format $format en cours de développement");
+        $type = $request->get('type', 'scripts-by-database');
+
+        switch ($type) {
+            case 'scripts-by-database':
+                $data = Script::select('db_target', DB::raw('count(*) as total'))
+                    ->groupBy('db_target')
+                    ->get();
+                $filename = 'rapport_scripts_par_base_' . date('Y-m-d') . '.csv';
+                break;
+
+            case 'script-usage':
+                $data = Script::withCount('views')
+                    ->with('creator')
+                    ->orderBy('views_count', 'desc')
+                    ->get();
+                $filename = 'rapport_utilisation_scripts_' . date('Y-m-d') . '.csv';
+                break;
+
+            case 'user-activity':
+                $data = User::withCount(['scripts', 'scriptViews'])
+                    ->orderBy('scripts_count', 'desc')
+                    ->get();
+                $filename = 'rapport_activite_utilisateurs_' . date('Y-m-d') . '.csv';
+                break;
+
+            default:
+                return back()->with('error', 'Type de rapport non reconnu');
+        }
+
+        return $this->exportToCsv($data, $filename);
+    }
+
+    /**
+     * Exporter les données en CSV
+     */
+    private function exportToCsv($data, $filename)
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function() use ($data) {
+            $file = fopen('php://output', 'w');
+
+            // En-têtes
+            if ($data->isNotEmpty()) {
+                fputcsv($file, array_keys($data->first()->toArray()));
+            }
+
+            // Données
+            foreach ($data as $row) {
+                fputcsv($file, $row->toArray());
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

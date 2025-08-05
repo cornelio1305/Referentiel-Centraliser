@@ -3,11 +3,10 @@
 @section('title', 'Dashboard Éditeur')
 
 @section('content')
-@include('partials.editeur.enavbar')
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
-        @include('partials.editeur.esidebar')
+        @include('partials.sidebar')
 
         <!-- Main content -->
         <div class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
@@ -20,65 +19,13 @@
                 </div>
             </div>
 
-            <!-- Statistiques rapides -->
+            <!-- Message de bienvenue -->
             <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card text-white bg-primary">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="card-title">Scripts Créés</h5>
-                                    <h3 class="mb-0">12</h3>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-code fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-success">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="card-title">Scripts Actifs</h5>
-                                    <h3 class="mb-0">8</h3>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-play-circle fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-warning">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="card-title">En Révision</h5>
-                                    <h3 class="mb-0">3</h3>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-clock fa-2x"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card text-white bg-info">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <h5 class="card-title">Vues Totales</h5>
-                                    <h3 class="mb-0">1,247</h3>
-                                </div>
-                                <div class="align-self-center">
-                                    <i class="fas fa-eye fa-2x"></i>
-                                </div>
-                            </div>
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h4>Bienvenue sur votre tableau de bord Éditeur</h4>
+                            <p class="text-muted">Vous êtes connecté en tant qu'éditeur. Les fonctionnalités de gestion des scripts seront bientôt disponibles.</p>
                         </div>
                     </div>
                 </div>
@@ -89,29 +36,27 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Actions Rapides</h5>
+                            <h5 class="mb-0">Actions Disponibles</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-3 mb-2">
-                                    <a href="{{ route('scripts.create') }}" class="btn btn-primary w-100">
-                                        <i class="fas fa-plus-circle me-2"></i>Nouveau Script
+                                <div class="col-md-4 mb-2">
+                                    <a href="{{ route('profile.show') }}" class="btn btn-warning w-100">
+                                        <i class="fas fa-user me-2"></i>Mon Profil
                                     </a>
                                 </div>
-                                <div class="col-md-3 mb-2">
-                                    <a href="{{ route('scripts.index') }}" class="btn btn-secondary w-100">
-                                        <i class="fas fa-list me-2"></i>Voir Mes Scripts
-                                    </a>
+                                <div class="col-md-4 mb-2">
+                                    <button class="btn btn-secondary w-100" disabled>
+                                        <i class="fas fa-code me-2"></i>Gestion Scripts (Bientôt)
+                                    </button>
                                 </div>
-                                <div class="col-md-3 mb-2">
-                                    <a href="{{ route('editeur.reports') }}" class="btn btn-info w-100">
-                                        <i class="fas fa-chart-bar me-2"></i>Mes Rapports
-                                    </a>
-                                </div>
-                                <div class="col-md-3 mb-2">
-                                    <a href="{{ route('editeur.profile') }}" class="btn btn-outline-primary w-100">
-                                        <i class="fas fa-user-edit me-2"></i>Mon Profil
-                                    </a>
+                                <div class="col-md-4 mb-2">
+                                    <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger w-100">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -119,58 +64,26 @@
                 </div>
             </div>
 
-            <!-- Scripts récents -->
+            <!-- Informations système -->
             <div class="row">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0">Scripts Récents</h5>
+                            <h5 class="mb-0">Informations Système</h5>
                         </div>
                         <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Nom du Script</th>
-                                            <th>Statut</th>
-                                            <th>Date de Création</th>
-                                            <th>Vues</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Script de Configuration Réseau</td>
-                                            <td><span class="badge bg-success">Actif</span></td>
-                                            <td>2024-01-15</td>
-                                            <td>156</td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-outline-primary">Voir</a>
-                                                <a href="#" class="btn btn-sm btn-outline-secondary">Modifier</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Script de Sauvegarde Automatique</td>
-                                            <td><span class="badge bg-warning">En Révision</span></td>
-                                            <td>2024-01-14</td>
-                                            <td>89</td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-outline-primary">Voir</a>
-                                                <a href="#" class="btn btn-sm btn-outline-secondary">Modifier</a>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>Script de Monitoring Système</td>
-                                            <td><span class="badge bg-success">Actif</span></td>
-                                            <td>2024-01-13</td>
-                                            <td>234</td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-outline-primary">Voir</a>
-                                                <a href="#" class="btn btn-sm btn-outline-secondary">Modifier</a>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Statut de l'application</h6>
+                                    <p class="text-success"><i class="fas fa-check-circle me-2"></i>Application opérationnelle</p>
+                                    <p><strong>Version Laravel:</strong> {{ app()->version() }}</p>
+                                    <p><strong>Environnement:</strong> {{ config('app.env') }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Dernière activité</h6>
+                                    <p><strong>Dernière connexion:</strong> {{ auth()->user()->updated_at->format('d/m/Y H:i') }}</p>
+                                    <p><strong>Rôle:</strong> {{ ucfirst(auth()->user()->role) }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>

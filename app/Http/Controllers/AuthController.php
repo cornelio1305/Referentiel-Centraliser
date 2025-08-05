@@ -34,13 +34,13 @@ class AuthController extends Controller
             // Rediriger selon le rôle
             switch ($user->role) {
                 case 'admin':
-                    return redirect()->intended('dashboard');
+                    return redirect()->route('dashboard');
                 case 'editeur':
-                    return redirect()->intended('editeur.dashboard');
+                    return redirect()->route('editeur.dashboard');
                 case 'lecteur':
-                    return redirect()->intended('lecteur.dashboard');
+                    return redirect()->route('lecteur.dashboard');
                 default:
-                    return redirect()->intended('lecteur.dashboard');
+                    return redirect()->route('lecteur.dashboard');
             }
         }
 
